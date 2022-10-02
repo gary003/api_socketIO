@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Todolist temps reel !</title>
+  </head>
+  <body  ></H1>TodoListe TR !!</H1>
+    <br/>
+    <section id="todo">
+    </section>
+
+    <div class="" style="width:100%" >
+      <input type="text" name="message" id="message" placeholder="entrer une tache"/>
+      <input type="button" value="envoyer" onclick="addTask()"/>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+
+        const socket = io.connect(<% mon_ip_port %>);
+
+        socket.on('connected',(taches) => {
+          const tachesALoader = taches.toString().split(',');
+          if(taches.length > 0){
+            tachesALoader.forEach(function(tache){
+              document.getElementById("todo").innerHTML += '<p id=\''+tache+'\'><input type="button" value="X" onclick="removeTask(\''+tache+'\')" \/>  '+tache+'</p>';
+            });
+          }
+        });
+
+        socket.on('add',(tache) => {
+          tache = decodeURI(tache);
+          document.getElementById("todo").innerHTML += '<p id=\''+tache+'\'><input type="button" value="X" onclick="removeTask(\''+tache+'\')" \/>  '+tache+'</p>';
+        });
+
+        socket.on('remove',(tache) => {
+          tache = decodeURI(tache);
+          document.getElementById(tache).parentNode.removeChild(document.getElementById(tache));
+        });
+
+         const removeTask = (task) => {
+          socket.emit('remove',task);
+        }
+
+         const addTask = () => {
+          const tache = document.getElementById('message').value;
+          if(tache != ""){
+            socket.emit('add',tache);
+            document.getElementById('message').value = "";
+          }
+        }
+
+    </script>
+
+  </body>
+</html>
